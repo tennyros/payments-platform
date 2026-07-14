@@ -8,11 +8,11 @@
 
 ## What Changed
 
-- 
+-
 
 ## Why
 
-- 
+-
 
 ## Testing
 
