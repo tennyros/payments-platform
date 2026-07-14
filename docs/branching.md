@@ -20,6 +20,8 @@ This repository uses short-lived feature branches for all development work.
 - Prefer rebase before merge when the branch is local and not shared.
 - Use merge when preserving branch history matters or the branch is already shared.
 - Use a new branch for each feature or fix instead of stacking unrelated work.
+- Batch small docs and spec edits into a single commit at the end of the task when practical.
+- Do not split trivial documentation edits into many commits unless they belong to distinct tasks.
 
 ## Integration Flow
 

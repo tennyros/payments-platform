@@ -29,3 +29,10 @@
 2. Create or update the relevant feature/fix spec.
 3. Implement the code on the matching branch.
 4. Keep the spec and code aligned in the same commit set.
+
+## Documentation Cadence
+
+- Small documentation and spec edits may be accumulated locally during the task.
+- Prefer a single grouped documentation commit at the end of the task or before switching to the next piece of work.
+- Avoid leaving the code and spec out of sync for long periods.
+- If a doc change affects implementation decisions, update the spec before merging the code.
