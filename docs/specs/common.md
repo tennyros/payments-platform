@@ -6,6 +6,8 @@ Payments Platform is a microservice-based payment system built as a Kotlin monor
 
 ## Architecture
 
+- Java 21 runtime
+- Kotlin 2.4.0
 - Kotlin + Gradle multi-module monorepo
 - Reactive HTTP stack with Spring WebFlux
 - Container-first local development
