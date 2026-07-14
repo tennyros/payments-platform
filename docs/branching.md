@@ -16,8 +16,18 @@ This repository uses short-lived feature branches for all development work.
 
 - Each task should map to one branch.
 - Keep branch names aligned with ticket IDs when a tracker exists.
-- Rebase or merge the feature branch into `dev` after review.
+- Integrate feature, fix, and chore branches into `dev`.
+- Prefer rebase before merge when the branch is local and not shared.
+- Use merge when preserving branch history matters or the branch is already shared.
 - Use a new branch for each feature or fix instead of stacking unrelated work.
+
+## Integration Flow
+
+1. Create a branch from `dev`.
+2. Implement the change and keep the branch synced with `dev` if needed.
+3. Rebase onto `dev` before review when safe.
+4. Merge the branch back into `dev` after approval.
+5. Delete the branch after integration.
 
 ## Examples
 
