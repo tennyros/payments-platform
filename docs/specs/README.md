@@ -11,6 +11,7 @@
 - Feature spec: `feature/PAYMENTS-1-name.md`
 - Fix spec: `fix/PAYMENTS-2-name.md`
 - If no tracker exists yet, keep the same pattern with a local ID.
+- The spec file name should match the branch ticket ID.
 
 ## Recommended Spec Structure
 
@@ -29,6 +30,7 @@
 2. Create or update the relevant feature/fix spec.
 3. Implement the code on the matching branch.
 4. Keep the spec and code aligned in the same commit set.
+5. Reference the spec file in the PR description.
 
 ## Documentation Cadence
 

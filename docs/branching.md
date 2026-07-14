@@ -16,6 +16,7 @@ This repository uses short-lived feature branches for all development work.
 
 - Each task should map to one branch.
 - Keep branch names aligned with ticket IDs when a tracker exists.
+- Every feature and fix branch should have a matching spec file.
 - Integrate feature, fix, and chore branches into `dev`.
 - Prefer rebase before merge when the branch is local and not shared.
 - Use merge when preserving branch history matters or the branch is already shared.
@@ -37,3 +38,8 @@ This repository uses short-lived feature branches for all development work.
 - `feature/PAYMENTS-2-payment-initiation`
 - `fix/PAYMENTS-14-null-response`
 - `chore/PAYMENTS-20-gradle-update`
+
+## Spec Link Rule
+
+- The branch description, PR description, and spec file should reference the same ticket ID.
+- The spec file should exist before the branch is merged into `dev`.
