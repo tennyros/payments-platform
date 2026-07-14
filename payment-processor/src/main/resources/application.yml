@@ -4,16 +4,10 @@ server:
 spring:
   application:
     name: payment-processor
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/payments}
-    username: ${SPRING_DATASOURCE_USERNAME:payments}
-    password: ${SPRING_DATASOURCE_PASSWORD:payments}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    open-in-view: false
-  kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  r2dbc:
+    url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/payments}
+    username: ${SPRING_R2DBC_USERNAME:payments}
+    password: ${SPRING_R2DBC_PASSWORD:payments}
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST:localhost}
