@@ -3,13 +3,16 @@ package com.payments.processor.service
 import com.payments.common.id.UuidV7Generator
 import com.payments.common.payment.CreatePaymentRequest
 import com.payments.common.payment.PaymentStatus
+import com.payments.common.payment.UpdatePaymentStatusRequest
 import com.payments.processor.model.PaymentRecord
 import com.payments.processor.model.toRecord
 import com.payments.processor.repository.PaymentRepository
+import com.payments.processor.repository.PaymentStatusRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -21,8 +24,9 @@ import java.util.UUID
 
 class PaymentServiceTest {
     private val repository: PaymentRepository = mock()
+    private val paymentStatusRepository: PaymentStatusRepository = mock()
     private val paymentEventPublisher: PaymentEventPublisher = mock()
-    private val service = PaymentService(repository, paymentEventPublisher)
+    private val service = PaymentService(repository, paymentStatusRepository, paymentEventPublisher)
 
     @Test
     fun `listPayments returns stored payments`() {
@@ -34,6 +38,7 @@ class PaymentServiceTest {
                 currency = "USD",
                 status = PaymentStatus.PENDING.name,
                 createdAt = Instant.parse("2026-07-15T10:15:30Z"),
+                updatedAt = Instant.parse("2026-07-15T10:15:30Z"),
             )
 
         whenever(repository.findAll()).thenReturn(
@@ -92,5 +97,44 @@ class PaymentServiceTest {
         assertEquals(7, created.id.version())
         assertTrue(created.id.toString().isNotBlank())
         verify(paymentEventPublisher).publishPaymentCreated(created)
+    }
+
+    @Test
+    fun `updatePaymentStatus transitions pending payment to processed`() {
+        val paymentId = UUID.fromString("55555555-5555-5555-5555-555555555555")
+        val current =
+            PaymentRecord(
+                paymentId = paymentId,
+                accountId = UUID.fromString("66666666-6666-6666-6666-666666666666"),
+                amount = BigDecimal("25.00"),
+                currency = "USD",
+                status = PaymentStatus.PENDING.name,
+                createdAt = Instant.parse("2026-07-15T10:15:30Z"),
+                updatedAt = Instant.parse("2026-07-15T10:15:30Z"),
+            )
+        val updated =
+            current.copy(
+                status = PaymentStatus.PROCESSED.name,
+                updatedAt = Instant.parse("2026-07-15T10:16:30Z"),
+            )
+
+        whenever(repository.findById(paymentId)).thenReturn(
+            Mono.just(current),
+            Mono.just(updated),
+        )
+        whenever(paymentStatusRepository.updateStatus(eq(paymentId), eq(PaymentStatus.PROCESSED.name), any()))
+            .thenReturn(Mono.just(1))
+        whenever(paymentEventPublisher.publishPaymentStatusChanged(any(), any(), any())).thenReturn(Mono.empty())
+
+        val result =
+            service
+                .updatePaymentStatus(
+                    paymentId,
+                    UpdatePaymentStatusRequest(status = PaymentStatus.PROCESSED),
+                ).block()!!
+
+        assertEquals(PaymentStatus.PROCESSED, result.status)
+        verify(paymentEventPublisher)
+            .publishPaymentStatusChanged(eq(result), eq(PaymentStatus.PENDING), any())
     }
 }

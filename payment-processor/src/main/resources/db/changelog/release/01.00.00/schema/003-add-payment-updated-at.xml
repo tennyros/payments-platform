@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+    <changeSet id="PAYMENTS-9-001-add-payment-updated-at" author="vadim">
+        <addColumn tableName="payment_queue">
+            <column name="updated_at" type="TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+
+        <update tableName="payment_queue">
+            <column name="updated_at" valueComputed="created_at"/>
+        </update>
+
+        <addNotNullConstraint
+                tableName="payment_queue"
+                columnName="updated_at"
+                columnDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+</databaseChangeLog>

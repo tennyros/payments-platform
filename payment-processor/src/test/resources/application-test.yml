@@ -1,15 +1,16 @@
 spring:
   datasource:
-    url: jdbc:h2:file:./build/testdb/payments;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:payments;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: ""
   liquibase:
     enabled: false
   r2dbc:
-    url: r2dbc:h2:file:///./build/testdb/payments?options=MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: r2dbc:h2:mem:///payments?options=MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password: ""
 
 payments:
   topics:
     payment-created: payments.payment-created
+    payment-status-changed: payments.payment-status-changed

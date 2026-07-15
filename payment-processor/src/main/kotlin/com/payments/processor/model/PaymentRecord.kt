@@ -28,6 +28,8 @@ data class PaymentRecord(
     val status: String,
     @Column("created_at")
     val createdAt: Instant,
+    @Column("updated_at")
+    val updatedAt: Instant,
 ) : Persistable<UUID> {
     @Transient
     private val newRecord: Boolean = true
@@ -58,4 +60,5 @@ fun CreatePaymentRequest.toRecord(
         currency = currency.uppercase(),
         status = PaymentStatus.PENDING.name,
         createdAt = createdAt,
+        updatedAt = createdAt,
     )

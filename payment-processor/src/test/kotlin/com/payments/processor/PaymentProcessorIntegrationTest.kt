@@ -3,12 +3,15 @@ package com.payments.processor
 import com.payments.common.payment.CreatePaymentRequest
 import com.payments.common.payment.PaymentCreatedEvent
 import com.payments.common.payment.PaymentStatus
+import com.payments.common.payment.PaymentStatusChangedEvent
+import com.payments.common.payment.UpdatePaymentStatusRequest
 import com.payments.processor.repository.PaymentRepository
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -32,7 +35,7 @@ import java.util.UUID
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@EmbeddedKafka(partitions = 1, topics = ["payments.payment-created"])
+@EmbeddedKafka(partitions = 1, topics = ["payments.payment-created", "payments.payment-status-changed"])
 @Import(TestKafkaConfiguration::class)
 class PaymentProcessorIntegrationTest {
     @Autowired
@@ -67,7 +70,7 @@ class PaymentProcessorIntegrationTest {
         val dataSource =
             DriverManagerDataSource().apply {
                 setDriverClassName("org.h2.Driver")
-                setUrl("jdbc:h2:file:./build/testdb/payments;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE")
+                setUrl("jdbc:h2:mem:payments;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE")
                 username = "sa"
                 password = ""
             }
@@ -117,7 +120,7 @@ class PaymentProcessorIntegrationTest {
         assertEquals(PaymentStatus.PENDING.name, storedPayment.status)
 
         createConsumer().use { consumer ->
-            consumer.subscribe(listOf(paymentCreatedTopic()))
+            consumer.subscribe(listOf(paymentCreatedTopic(), paymentStatusChangedTopic()))
             val records = consumer.poll(Duration.ofSeconds(10))
             val record: ConsumerRecord<String, String> = records.records(paymentCreatedTopic()).first()
             val event = objectMapper.readValue(record.value(), PaymentCreatedEvent::class.java)
@@ -130,6 +133,37 @@ class PaymentProcessorIntegrationTest {
             assertEquals(storedPayment.currency, event.currency)
             assertEquals(PaymentStatus.PENDING, event.status)
             assertEquals(storedPayment.createdAt, event.createdAt)
+
+            webTestClient
+                .patch()
+                .uri("/payments/${storedPayment.id}/status")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(UpdatePaymentStatusRequest(status = PaymentStatus.PROCESSED))
+                .exchange()
+                .expectStatus()
+                .isOk
+                .expectBody()
+                .jsonPath("$.id")
+                .isEqualTo(storedPayment.id.toString())
+                .jsonPath("$.status")
+                .isEqualTo(PaymentStatus.PROCESSED.name)
+
+            val updatedPayment = paymentRepository.findById(storedPayment.id).block()!!
+            assertEquals(PaymentStatus.PROCESSED.name, updatedPayment.status)
+            assertTrue(updatedPayment.updatedAt >= storedPayment.createdAt)
+
+            val statusRecords = consumer.poll(Duration.ofSeconds(10))
+            val statusRecord: ConsumerRecord<String, String> = statusRecords.records(paymentStatusChangedTopic()).first()
+            val statusEvent = objectMapper.readValue(statusRecord.value(), PaymentStatusChangedEvent::class.java)
+
+            assertNotNull(statusEvent)
+            assertEquals(storedPayment.id, statusEvent.paymentId)
+            assertEquals(storedPayment.accountId, statusEvent.accountId)
+            assertEquals(storedPayment.amount, statusEvent.amount)
+            assertEquals(storedPayment.currency, statusEvent.currency)
+            assertEquals(PaymentStatus.PENDING, statusEvent.previousStatus)
+            assertEquals(PaymentStatus.PROCESSED, statusEvent.newStatus)
+            assertEquals(updatedPayment.updatedAt, statusEvent.changedAt)
         }
     }
 
@@ -137,7 +171,7 @@ class PaymentProcessorIntegrationTest {
         DefaultKafkaConsumerFactory<String, String>(
             mapOf(
                 ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG to embeddedKafkaBroker.brokersAsString,
-                ConsumerConfig.GROUP_ID_CONFIG to "payments-platform-it",
+                ConsumerConfig.GROUP_ID_CONFIG to "payments-platform-it-${UUID.randomUUID()}",
                 ConsumerConfig.AUTO_OFFSET_RESET_CONFIG to "earliest",
                 ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG to "true",
                 ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG to StringDeserializer::class.java.name,
@@ -148,4 +182,6 @@ class PaymentProcessorIntegrationTest {
         ).createConsumer()
 
     private fun paymentCreatedTopic(): String = environment.getRequiredProperty("payments.topics.payment-created")
+
+    private fun paymentStatusChangedTopic(): String = environment.getRequiredProperty("payments.topics.payment-status-changed")
 }

@@ -23,6 +23,7 @@ spring:
 payments:
   topics:
     payment-created: ${PAYMENT_CREATED_TOPIC:payments.payment-created}
+    payment-status-changed: ${PAYMENT_STATUS_CHANGED_TOPIC:payments.payment-status-changed}
 
 management:
   endpoint:

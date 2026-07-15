@@ -30,3 +30,8 @@ data class CreatePaymentRequest(
     @field:NotBlank
     val currency: String,
 )
+
+data class UpdatePaymentStatusRequest(
+    @field:NotNull
+    val status: PaymentStatus?,
+)
