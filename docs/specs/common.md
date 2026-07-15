@@ -17,7 +17,7 @@ Payments Platform is a microservice-based payment system built as a Kotlin monor
 
 - `api-gateway` - entry point for client traffic
 - `account-service` - account and balance domain
-- `payment-processor` - payment execution and orchestration
+- `payment-processor` - payment execution, queue persistence, and orchestration
 - `notification-service` - notification intake and delivery events
 - `common` - shared contracts and utilities
 
