@@ -15,6 +15,7 @@ import java.util.UUID
 @Service
 class PaymentService(
     private val paymentRepository: PaymentRepository,
+    private val paymentEventPublisher: PaymentEventPublisher,
 ) {
     fun listPayments(): Flux<PaymentDto> = paymentRepository.findAll().map { it.toDto() }
 
@@ -28,4 +29,7 @@ class PaymentService(
         paymentRepository
             .save(request.toRecord())
             .map { it.toDto() }
+            .flatMap { payment ->
+                paymentEventPublisher.publishPaymentCreated(payment).thenReturn(payment)
+            }
 }

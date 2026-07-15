@@ -14,6 +14,15 @@ spring:
     url: ${SPRING_R2DBC_URL:r2dbc:postgresql://localhost:5432/payments}
     username: ${SPRING_R2DBC_USERNAME:payments}
     password: ${SPRING_R2DBC_PASSWORD:payments}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+payments:
+  topics:
+    payment-created: ${PAYMENT_CREATED_TOPIC:payments.payment-created}
 
 management:
   endpoints:

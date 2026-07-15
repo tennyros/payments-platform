@@ -3,12 +3,15 @@ package com.payments.processor.service
 import com.payments.common.payment.CreatePaymentRequest
 import com.payments.common.payment.PaymentStatus
 import com.payments.processor.model.PaymentRecord
+import com.payments.processor.model.toRecord
 import com.payments.processor.repository.PaymentRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito
-import reactor.core.publisher.Flux
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.math.BigDecimal
@@ -16,8 +19,9 @@ import java.time.Instant
 import java.util.UUID
 
 class PaymentServiceTest {
-    private val repository: PaymentRepository = Mockito.mock(PaymentRepository::class.java)
-    private val service = PaymentService(repository)
+    private val repository: PaymentRepository = mock()
+    private val paymentEventPublisher: PaymentEventPublisher = mock()
+    private val service = PaymentService(repository, paymentEventPublisher)
 
     @Test
     fun `listPayments returns stored payments`() {
@@ -31,7 +35,10 @@ class PaymentServiceTest {
                 createdAt = Instant.parse("2026-07-15T10:15:30Z"),
             )
 
-        Mockito.`when`(repository.findAll()).thenReturn(Flux.just(payment))
+        whenever(repository.findAll()).thenReturn(
+            reactor.core.publisher.Flux
+                .just(payment),
+        )
 
         StepVerifier
             .create(service.listPayments())
@@ -47,10 +54,11 @@ class PaymentServiceTest {
 
     @Test
     fun `getPayment returns not found for unknown id`() {
-        Mockito.`when`(repository.findById(Mockito.any(UUID::class.java))).thenReturn(Mono.empty())
+        val id = UUID.randomUUID()
+        whenever(repository.findById(id)).thenReturn(Mono.empty())
 
         StepVerifier
-            .create(service.getPayment(UUID.randomUUID()))
+            .create(service.getPayment(id))
             .expectErrorMatches { error -> error.message?.contains("Payment not found") == true }
             .verify()
     }
@@ -63,25 +71,24 @@ class PaymentServiceTest {
                 amount = BigDecimal("19.99"),
                 currency = "usd",
             )
-        val saved =
-            PaymentRecord(
+        val record =
+            request.toRecord(
                 id = UUID.fromString("44444444-4444-4444-4444-444444444444"),
-                accountId = request.accountId!!,
-                amount = request.amount,
-                currency = request.currency.uppercase(),
-                status = PaymentStatus.PENDING.name,
                 createdAt = Instant.parse("2026-07-15T10:15:30Z"),
             )
 
-        Mockito.`when`(repository.save(Mockito.any(PaymentRecord::class.java))).thenReturn(Mono.just(saved))
+        whenever(repository.save(any())).thenAnswer { invocation ->
+            Mono.just(invocation.getArgument(0))
+        }
+        whenever(paymentEventPublisher.publishPaymentCreated(any())).thenReturn(Mono.empty())
 
         val created = service.createPayment(request).block()!!
 
-        assertEquals(saved.id, created.id)
-        assertEquals(saved.accountId, created.accountId)
-        assertEquals(saved.amount, created.amount)
+        assertEquals(record.accountId, created.accountId)
+        assertEquals(record.amount, created.amount)
         assertEquals("USD", created.currency)
         assertEquals(PaymentStatus.PENDING, created.status)
         assertTrue(created.id.toString().isNotBlank())
+        verify(paymentEventPublisher).publishPaymentCreated(created)
     }
 }

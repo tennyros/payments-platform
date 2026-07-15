@@ -16,10 +16,10 @@ Provide a reactive payment processor API with Liquibase-managed schema and a pay
   - `POST /payments`
   - Shared payment DTOs in `common`
   - PostgreSQL schema managed by XML Liquibase changelogs
+  - Kafka publication of `payment.created` events
 - Out of scope:
   - Payment orchestration with external providers
   - Retry and compensation workflows
-  - Kafka event publication
 
 ## API Changes
 
@@ -32,6 +32,7 @@ Provide a reactive payment processor API with Liquibase-managed schema and a pay
 - `payment_queue` stores payment rows.
 - `payment_status_reference` stores status reference rows.
 - Liquibase seeds the status reference table.
+- A successful payment creation publishes a Kafka event.
 
 ## Implementation Notes
 
@@ -50,4 +51,5 @@ Provide a reactive payment processor API with Liquibase-managed schema and a pay
 - [ ] Payment processor exposes reactive payment endpoints.
 - [ ] PostgreSQL schema is managed by Liquibase XML changelogs.
 - [ ] Status reference data is seeded from Liquibase.
+- [ ] Payment creation publishes a Kafka event.
 - [ ] Branch and spec use the same ticket ID.
