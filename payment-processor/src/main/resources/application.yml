@@ -25,6 +25,10 @@ payments:
     payment-created: ${PAYMENT_CREATED_TOPIC:payments.payment-created}
 
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:

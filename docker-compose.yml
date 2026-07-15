@@ -53,8 +53,95 @@ services:
       KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_CFG_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       ALLOW_PLAINTEXT_LISTENER: "yes"
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server localhost:9092 --list >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
     volumes:
       - kafka_data:/bitnami/kafka
+    networks:
+      - payments-net
+
+  api-gateway:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: api-gateway
+    image: payments-platform/api-gateway:local
+    container_name: payments-api-gateway
+    environment:
+      SERVER_PORT: 8080
+    ports:
+      - "8080:8080"
+    networks:
+      - payments-net
+
+  account-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: account-service
+    image: payments-platform/account-service:local
+    container_name: payments-account-service
+    environment:
+      SERVER_PORT: 8081
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payments
+      SPRING_DATASOURCE_USERNAME: payments
+      SPRING_DATASOURCE_PASSWORD: payments
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/payments
+      SPRING_R2DBC_USERNAME: payments
+      SPRING_R2DBC_PASSWORD: payments
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+    networks:
+      - payments-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  payment-processor:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: payment-processor
+    image: payments-platform/payment-processor:local
+    container_name: payments-payment-processor
+    environment:
+      SERVER_PORT: 8082
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/payments
+      SPRING_DATASOURCE_USERNAME: payments
+      SPRING_DATASOURCE_PASSWORD: payments
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/payments
+      SPRING_R2DBC_USERNAME: payments
+      SPRING_R2DBC_PASSWORD: payments
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      PAYMENT_CREATED_TOPIC: payments.payment-created
+    ports:
+      - "8082:8082"
+    networks:
+      - payments-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+
+  notification-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: notification-service
+    image: payments-platform/notification-service:local
+    container_name: payments-notification-service
+    environment:
+      SERVER_PORT: 8083
+    ports:
+      - "8083:8083"
     networks:
       - payments-net
 

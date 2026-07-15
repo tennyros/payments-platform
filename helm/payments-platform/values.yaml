@@ -1,0 +1,44 @@
+global:
+  imagePullPolicy: IfNotPresent
+
+services:
+  api-gateway:
+    image:
+      repository: ghcr.io/tennyros/payments-platform/api-gateway
+      tag: latest
+    port: 8080
+    env: {}
+  account-service:
+    image:
+      repository: ghcr.io/tennyros/payments-platform/account-service
+      tag: latest
+    port: 8081
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/payments
+      SPRING_DATASOURCE_USERNAME: payments
+      SPRING_DATASOURCE_PASSWORD: payments
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgresql:5432/payments
+      SPRING_R2DBC_USERNAME: payments
+      SPRING_R2DBC_PASSWORD: payments
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: "6379"
+  payment-processor:
+    image:
+      repository: ghcr.io/tennyros/payments-platform/payment-processor
+      tag: latest
+    port: 8082
+    env:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgresql:5432/payments
+      SPRING_DATASOURCE_USERNAME: payments
+      SPRING_DATASOURCE_PASSWORD: payments
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgresql:5432/payments
+      SPRING_R2DBC_USERNAME: payments
+      SPRING_R2DBC_PASSWORD: payments
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      PAYMENT_CREATED_TOPIC: payments.payment-created
+  notification-service:
+    image:
+      repository: ghcr.io/tennyros/payments-platform/notification-service
+      tag: latest
+    port: 8083
+    env: {}

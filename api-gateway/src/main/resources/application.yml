@@ -6,6 +6,10 @@ spring:
     name: api-gateway
 
 management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
   endpoints:
     web:
       exposure:
