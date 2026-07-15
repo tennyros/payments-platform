@@ -2,12 +2,12 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import org.gradle.testing.jacoco.tasks.JacocoReport
 
 plugins {
-    kotlin("jvm") version "2.4.0" apply false
-    kotlin("plugin.spring") version "2.4.0" apply false
-    id("org.springframework.boot") version "4.0.2" apply false
+    kotlin("jvm") version "2.4.10" apply false
+    kotlin("plugin.spring") version "2.4.10" apply false
+    id("org.springframework.boot") version "4.1.0" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     id("com.diffplug.spotless") version "8.8.0" apply false
-    id("org.sonarqube") version "7.2.3.7755"
+    id("org.sonarqube") version "7.3.1.8318"
     jacoco
 }
 
