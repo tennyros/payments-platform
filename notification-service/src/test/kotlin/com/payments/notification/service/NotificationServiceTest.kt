@@ -1,5 +1,6 @@
 package com.payments.notification.service
 
+import com.payments.common.id.UuidV7Generator
 import com.payments.common.notification.CreateNotificationRequest
 import com.payments.common.notification.NotificationChannel
 import com.payments.common.notification.NotificationStatus
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import reactor.test.StepVerifier
-import java.util.UUID
 
 class NotificationServiceTest {
     private val service = NotificationService()
@@ -34,6 +34,7 @@ class NotificationServiceTest {
         assertEquals("user@example.com", created.recipient)
         assertEquals(NotificationChannel.EMAIL, created.channel)
         assertEquals(NotificationStatus.PENDING, created.status)
+        assertEquals(7, created.id.version())
         assertTrue(created.id.toString().isNotBlank())
 
         StepVerifier
@@ -45,7 +46,7 @@ class NotificationServiceTest {
     @Test
     fun `getNotification returns not found for unknown id`() {
         StepVerifier
-            .create(service.getNotification(UUID.randomUUID()))
+            .create(service.getNotification(UuidV7Generator.generate()))
             .expectErrorMatches { error -> error.message?.contains("Notification not found") == true }
             .verify()
     }

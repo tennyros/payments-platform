@@ -28,12 +28,13 @@ Provide a basic notification service API with reactive CRUD-style endpoints.
 
 ## Data Changes
 
-- None yet.
+- Notification records use application-generated UUIDv7 identifiers.
 
 ## Implementation Notes
 
 - The service is reactive and uses in-memory storage for now.
 - Notification channel and status are modeled as shared enums in `common`.
+- New internal IDs for write-heavy domain records use UUIDv7 by default.
 - See the companion coroutine mirror spec for the Kotlin coroutine equivalent of this API shape.
 
 ## Testing

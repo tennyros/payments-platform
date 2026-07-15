@@ -1,5 +1,6 @@
 package com.payments.processor.service
 
+import com.payments.common.id.UuidV7Generator
 import com.payments.common.payment.CreatePaymentRequest
 import com.payments.common.payment.PaymentStatus
 import com.payments.processor.model.PaymentRecord
@@ -27,7 +28,7 @@ class PaymentServiceTest {
     fun `listPayments returns stored payments`() {
         val payment =
             PaymentRecord(
-                id = UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                paymentId = UUID.fromString("11111111-1111-1111-1111-111111111111"),
                 accountId = UUID.fromString("22222222-2222-2222-2222-222222222222"),
                 amount = BigDecimal("125.50"),
                 currency = "USD",
@@ -43,7 +44,7 @@ class PaymentServiceTest {
         StepVerifier
             .create(service.listPayments())
             .assertNext { dto ->
-                assertEquals(payment.id, dto.id)
+                assertEquals(payment.paymentId, dto.id)
                 assertEquals(payment.accountId, dto.accountId)
                 assertEquals(payment.amount, dto.amount)
                 assertEquals(payment.currency, dto.currency)
@@ -54,7 +55,7 @@ class PaymentServiceTest {
 
     @Test
     fun `getPayment returns not found for unknown id`() {
-        val id = UUID.randomUUID()
+        val id = UuidV7Generator.generate()
         whenever(repository.findById(id)).thenReturn(Mono.empty())
 
         StepVerifier
@@ -88,6 +89,7 @@ class PaymentServiceTest {
         assertEquals(record.amount, created.amount)
         assertEquals("USD", created.currency)
         assertEquals(PaymentStatus.PENDING, created.status)
+        assertEquals(7, created.id.version())
         assertTrue(created.id.toString().isNotBlank())
         verify(paymentEventPublisher).publishPaymentCreated(created)
     }

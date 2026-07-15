@@ -32,6 +32,7 @@ class NotificationControllerTest {
         assertEquals(request.subject, notification.subject)
         assertEquals(request.body, notification.body)
         assertEquals(NotificationStatus.PENDING, notification.status)
+        assertEquals(7, notification.id.version())
         assertNotNull(notification.id)
         assertNotNull(notification.createdAt)
     }

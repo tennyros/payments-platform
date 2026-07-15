@@ -32,4 +32,5 @@ Payments Platform is a microservice-based payment system built as a Kotlin monor
 - Prefer reactive APIs for new service code.
 - Keep service boundaries explicit.
 - Put shared DTOs and contracts in `common` only when necessary.
+- Prefer UUIDv7 for new internal IDs on write-heavy entities and append-only records.
 - Track every significant change in a dedicated spec file.

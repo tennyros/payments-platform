@@ -45,6 +45,7 @@ class PaymentControllerTest {
         assertEquals(request.amount, response.body!!.amount)
         assertEquals("EUR", response.body!!.currency)
         assertEquals(PaymentStatus.PENDING, response.body!!.status)
+        assertEquals(7, response.body!!.id.version())
         assertTrue(
             response.body!!
                 .id

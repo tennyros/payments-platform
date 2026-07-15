@@ -1,12 +1,12 @@
 package com.payments.processor.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.payments.common.payment.PaymentCreatedEvent
 import com.payments.common.payment.PaymentDto
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
+import tools.jackson.databind.ObjectMapper
 
 @Service
 class KafkaPaymentEventPublisher(

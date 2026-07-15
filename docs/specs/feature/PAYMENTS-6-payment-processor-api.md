@@ -32,6 +32,7 @@ Provide a reactive payment processor API with Liquibase-managed schema and a pay
 - `payment_queue` stores payment rows.
 - `payment_status_reference` stores status reference rows.
 - Liquibase seeds the status reference table.
+- New payment rows use UUIDv7 identifiers generated in the application.
 - A successful payment creation publishes a Kafka event.
 
 ## Implementation Notes
@@ -39,12 +40,14 @@ Provide a reactive payment processor API with Liquibase-managed schema and a pay
 - The service is reactive via WebFlux and R2DBC.
 - Liquibase uses XML changelogs under `db/changelog/release/01.00.00`.
 - Payment statuses are modeled as shared enums in `common`.
+- New internal IDs for write-heavy domain records use UUIDv7 by default.
 
 ## Testing
 
 - Verify list endpoint returns stored payments.
 - Verify creation returns a generated UUID.
 - Verify unknown payment returns 404.
+- Verify the payment is persisted in PostgreSQL and a Kafka event is produced.
 
 ## Acceptance Criteria
 

@@ -1,5 +1,6 @@
 package com.payments.notification.model
 
+import com.payments.common.id.UuidV7Generator
 import com.payments.common.notification.CreateNotificationRequest
 import com.payments.common.notification.NotificationChannel
 import com.payments.common.notification.NotificationDto
@@ -29,7 +30,7 @@ fun NotificationRecord.toDto(): NotificationDto =
     )
 
 fun CreateNotificationRequest.toRecord(
-    id: UUID = UUID.randomUUID(),
+    id: UUID = UuidV7Generator.generate(),
     createdAt: Instant = Instant.now(),
 ): NotificationRecord =
     NotificationRecord(
