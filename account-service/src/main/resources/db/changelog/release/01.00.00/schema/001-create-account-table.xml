@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+            http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.24.xsd">
+    <changeSet id="PAYMENTS-7-001-create-account-table" author="vadim">
+        <createTable tableName="account">
+            <column name="id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="owner_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="currency" type="VARCHAR(3)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="balance" type="NUMERIC(19,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="active" type="BOOLEAN">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP WITH TIME ZONE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createIndex indexName="idx_account_owner_name" tableName="account">
+            <column name="owner_name"/>
+        </createIndex>
+    </changeSet>
+</databaseChangeLog>
