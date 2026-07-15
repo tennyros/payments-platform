@@ -3,7 +3,7 @@ package com.payments.account
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["com.payments"])
 class AccountServiceApplication
 
 fun main(args: Array<String>) {

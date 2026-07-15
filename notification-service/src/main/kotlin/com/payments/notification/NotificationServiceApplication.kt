@@ -3,7 +3,7 @@ package com.payments.notification
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["com.payments"])
 class NotificationServiceApplication
 
 fun main(args: Array<String>) {

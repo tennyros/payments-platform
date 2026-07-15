@@ -3,7 +3,7 @@ package com.payments.processor
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = ["com.payments"])
 class PaymentProcessorApplication
 
 fun main(args: Array<String>) {
